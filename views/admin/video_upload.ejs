@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Video Upload</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Raleway:100,200,300,400,500,700,800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <link rel="stylesheet" href="/stylesheets/video_upload.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
+    <script src='https://kit.fontawesome.com/a076d05399.js'></script>
+
+
+</head>
+
+<body>
+
+    <div class="modal" id="myModal" role="dialog">
+        <div class="animated fadeInDown faster modal-dialog">
+
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <div class="modal-header-head">
+                        <label>Custom Tags</label>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+
+                        <input type="text" class="form-control" placeholder="Add Custom Tag" name="custom_tag"
+                            id="custom_tag" style="margin-bottom: 10px;" required />
+                        <div class="btn btn-default" onclick="add_custom_tag()">Add</div>
+                    </div>
+                    <div class="options_div" id="categorylist">
+                        <ul id="category">
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="upload_overlay" style="width: 100%;">
+        <div class="showmeprogress"></div>
+    </div>
+
+    <div class="container">
+
+        <div class="login_div" style="margin-bottom: 30px; margin-top: 30px;">
+            <a href="/all_video"><button class="btn btn-default">Back</button></a>
+            <a href="/logout"><button class="btn btn-danger logout" style="float: right;">Logout</button></a>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12">
+
+                <div class="col-lg-12"><img style="width:280px; margin: 20px auto; display: block;"
+                        src="/images/inkincaps.png" width="100%" height="100%" /></div>
+
+                <div class="col-lg-12 video_form">
+
+                    <form id="videoupload_form" class="wrapper animated fadeIn" method="POST"
+                        onsubmit="return validateProfileForm();" autocomplete="off">
+
+                        <h2 class="text-center" style="margin-bottom: 20px;">Add Video</h2>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Video Title</label>
+                                <input type="text" class="form-control" name="title" id="video_title" required />
+                            </div>
+                            <div class="form-group">
+                                <label>Video</label>
+                                <input type="file" id="videoUpload" accept="video/*" class="form-control"
+                                    name="video_file" required />
+                            </div>
+
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea class="form-control" rows="10" name="description" id="video_description"
+                                    required></textarea>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group">
+                                <label>Tags</label>
+                                <div class="col-lg-12" style="padding:0">
+                                    <div class="all_custom_tag col-lg-8" style="padding:0"></div>
+
+                                    <div style="padding: 0; position: absolute; top: 0; right: 0;">
+                                        <span class="btn btn-default" style="float:right" onclick="modal_open()">Add
+                                            Tag</span>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 text-center">
+                            <button class="btn btn-default" id="submit"
+                                style="width:200px;margin:20px;background:#000;color:#fff">UPLOAD</button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="javascripts/main.js"></script>
+    <script>
+        var status;
+        function change() {
+            window.location.href = "/category_page";
+        }
+
+        $(document).ready(function () {
+            get_all_tag_func();
+
+        })
+
+        function modal_open() {
+            $('#myModal').modal('show');
+            $('#myModal').css({ 'background-color': 'rgba(0,0,0,0.3)' });
+        }
+
+        function get_all_tag_func() {
+            $.ajax({
+                url: '/get_all_tag',
+                contentType: "application/json",
+                processData: false,
+                type: 'GET',
+                success: function (data, status) {
+                    var buffer = "";
+                    if (data.data.length < 1) {
+                        $(".all_custom_tag").html(`<p>No Tags</p>`);
+                    } else {
+                        for (j = 0; j < data.data.length; j++) {
+
+                            buffer += `<div style="display:inline-block;margin:2px;border-radius: 10px;">
+                               
+                               <span class="btn btn-default" id="${data.data[j].tag}" onclick="custom_tag_btn('${data.data[j].tag}')">${data.data[j].tag}</span>
+                           </div>`
+
+                        }
+                        $(".all_custom_tag").html(buffer)
+                    }
+                }
+            })
+        }
+        $("#videoupload_form").submit(function (e) {
+            e.preventDefault();
+        });
+
+        /// cloudinary image upload
+
+
+
+        ///
+
+        function validateProfileForm() {
+            var formdata = new FormData();
+            // var cloudinary_url = `https://api.cloudinary.com/v1_1/ajeet-furniture/video/upload`;
+            // var cloudinary_preset = `gde5cjpl`;
+            var fileUpload = document.getElementById('videoUpload');
+            var file_name = document.getElementById('videoUpload').files[0].name;
+            console.log(file_name);
+            var file;
+
+            formdata.append("file", $('#videoUpload')[0].files[0]);
+            // formdata.append('upload_preset', cloudinary_preset);
+            var download_link, format, version, signature, video_public_id, image_url;
+            ///
+            download_link = `https://videogallery.nyc3.digitaloceanspaces.com/${file_name}`
+            console.log(download_link);
+            formdata.append("title", $("#video_title").val());
+            // formdata.append("video", $('#videoUpload')[0].files[0]);
+            formdata.append("description", $('#video_description').val());
+            // formdata.append("tag", $("#video_tag").val().trim().split(" "));
+            formdata.append("tag", tag);
+            formdata.append("category", category);
+            formdata.append("subcategory", subcategory);
+            formdata.append('download_link', download_link);
+            formdata.append('image_url', image_url);
+            formdata.append('signature', signature);
+
+            $.ajax({
+                url: '/video_gallery',
+                data: formdata,
+                contentType: false,
+                processData: false,
+                type: 'POST',
+                xhr: function () {
+                    var xhr = new window.XMLHttpRequest();
+                    xhr.upload.addEventListener("progress", function (evt) {
+                        if (evt.lengthComputable) {
+                            var percentComplete = evt.loaded / evt.total;
+                            console.log(percentComplete);
+                            $(".upload_overlay").css("display", "flex");
+                            // $(".showmeprogress").css({'width':(Math.round(percentComplete * 100)) + '%'})
+                            $(".showmeprogress").html(`<h4 style="display:inline-block; color : white;">${(Math.round(percentComplete * 100)) + '%'}</h4>`)
+                        }
+                    }, false)
+                    return xhr;
+                },
+                beforeSend: function () {
+                    $(".upload_overlay").css("display", "flex");
+
+                    $(".showmeprogress").html(`<h4 style="display:inline-block; color : white;">Please wait under proccessing.....</h4>`)
+                    console.log("Uploading...");
+                },
+                success: function (data, status) {
+                    console.log(data)
+                    if (data.status == false) {
+                        $(".upload_overlay").css("display", "none");
+                        console.log("Video format is not supported");
+                    }
+                    else {
+
+                        $(".upload_overlay").css("display", "none");
+                        console.log("Uploaded");
+                        window.location.href = '/all_video';
+                    }
+                    
+                },
+                error: function(err){
+                    console.log("errorrrrrrrrrrrrrrr")
+                    console.log(err);
+
+                }
+
+            })
+
+            ///
+            console.log("sasasasas");
+
+        }
+
+        var category;
+        var subcategory;
+        var tag;
+        function get_Category() {
+            var cat = [];
+            $.each($("input[name='category']:checked"), function () {
+                cat.push($(this).val());
+            });
+            category = cat;
+            console.log(category)
+        }
+
+        function get_Subcategory() {
+            var subcat = [];
+            $.each($("input[name='subcategory']:checked"), function () {
+                subcat.push($(this).val());
+            });
+
+            subcategory = subcat;
+            console.log(subcategory)
+        }
+        var custom_tag_array = [];
+        function custom_tag_btn(cus_tag) {
+            console.log(cus_tag);
+            let index = custom_tag_array.indexOf(cus_tag);
+            if (index >= 0) {
+                custom_tag_array.splice(index, 1);
+                $(`#${cus_tag}`).css({ "background-color": "white", "color": "#000000" })
+            } else {
+                custom_tag_array.push(cus_tag);
+                $(`#${cus_tag}`).css({ "background-color": "grey", "color": "white" })
+            }
+            tag = custom_tag_array;
+        }
+        function add_custom_tag() {
+            var custom_tag = $('#custom_tag').val();
+            console.log(custom_tag);
+            $.ajax({
+                url: '/add_tag',
+                type: 'POST',
+                data: { tag: custom_tag },
+                success: function (data, status) {
+                    console.log(data);
+                    if (data.status) {
+                        $('.modal-header-head').html(`<h4>Successfully added tag</h4>`);
+                        setTimeout(function () {
+                            $('.modal').fadeOut();
+                            $("#myModal").modal("hide");
+                            $('.modal-header-head').html(``);
+                            $('#custom_tag').val('');
+                            get_all_tag_func();
+                        }, 2000)
+                    } else {
+                        $('.modal-header-head').html(`<h4>Something went wrong</h4>`);
+                        setTimeout(function () {
+                            $('.modal').fadeOut();
+                            $("#myModal").modal("hide");
+                            $('.modal-header-head').html(``);
+                            get_all_tag_func();
+                        }, 2000)
+                    }
+
+                }
+            })
+        }
+    </script>
+
+</body>
+
+</html>

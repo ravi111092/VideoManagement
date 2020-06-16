@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Raleway:100,200,300,400,500,700,800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <link rel="stylesheet" href="/stylesheets/register.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
+    <script src='https://kit.fontawesome.com/a076d05399.js'></script>
+
+
+</head>
+
+<body>
+    <div id="popup1" class="overlay">
+        <div class="popup">
+            <div class="content">
+                <h1 style="text-align: center;"></h1>
+            </div>
+        </div>
+    </div>
+
+    <img style="width: 50px; margin: 20px auto; display: block;" src="/images/logo-only.png" width="100%" height="100%" />
+    <a href="/all_video_admin"><button class="back_btn"style="float: left; margin-left:50px ">Back</button></a>
+    <div class="container" style="margin-top: 20px; border: 1px solid #efefef; padding: 50px;"> 
+            <div class="col-lg-12 holder" style="padding: 0;">
+                <h2 class="text-center" style="margin-bottom: 20px;">Account Settings</h2>
+                <div class="col-lg-10" style="padding: 0;"> 
+                    <form id="user_form" class="wrapper animated fadeIn" method="POST" onsubmit="return validateProfileForm();" autocomplete="off">
+                            <div class="form-group">
+                                <input type="text" name="fullname" id="fullname" placeholder="Full Name" required />
+                            </div>
+            
+                            <div class="form-group">
+                                <input type="email" rows="10" name="email" id="email" placeholder="Email" required></input>
+                                <p class="error_email" style="color: red; margin: 0;"></p>
+                            </div>
+                            <div class="form-group">
+                                <input type="password" name="password" id="password" placeholder="Password" required />
+                            </div>
+                                <button id="submit">Update</button>
+                    <!-- <button id="submit" style="background: #c95858 !important;">Delete Account</button> -->
+                        </form>
+                </div>
+            </div>
+    </div>
+    <script>
+
+        $(document).ready(function(){
+            get_users();
+        })
+
+        $("#user_form").submit(function (e) {
+            e.preventDefault();
+        });
+
+        function validateProfileForm() {
+            var formdata = new FormData();
+            var fullname, email, password, confirmpass;
+            fullname = $('#fullname').val();
+            email = $('#email').val();
+            password = $('#password').val();
+            confirmpass = $('#confirmpass').val();
+            formdata.append("fullname", fullname);
+            formdata.append("email", email);
+            formdata.append("password", password);
+            formdata.append("confirmpass", confirmpass);
+
+            if(password != confirmpass){
+                $('#password').css("border","1px solid red")
+                $('#confirmpass').css("border","1px solid red")
+                $(".error").html("Password doesn't match")
+
+                setTimeout(() => {
+                $('#password').css({  "border": "none", "border-bottom": "2px solid #cccccc", "background": "transparent"})
+                $('#confirmpass').css({  "border": "none", "border-bottom": "2px solid #cccccc", "background": "transparent"})
+                $(".error").html("")
+                }, 1200);
+
+            }else{
+                $('#password').css("border","1px solid green")
+                $('#confirmpass').css("border","1px solid green")
+
+                setTimeout(() => {
+                $('#password').css({  "border": "none", "border-bottom": "2px solid #cccccc", "background": "transparent"})
+                $('#confirmpass').css({  "border": "none", "border-bottom": "2px solid #cccccc", "background": "transparent"})
+                $(".error").html("")
+                }, 1200);
+
+                $.ajax({
+                url: 'register',
+                data: formdata,
+                contentType: false,
+                processData: false,
+                type: 'POST',
+                beforeSend : function(){
+                    console.log("before sending....");
+                },
+                success : function(data){
+                    
+                   if(data.success){
+                    console.log(data);
+                    $(".overlay").css("display","block");
+
+                    $(".content h1").html("User Added Successfully");
+
+                    $(':input').val('');
+
+                    setTimeout(() => {
+                        $(".overlay").css("display","none");
+                    }, 1000);
+
+                   }else{
+                       $(".error_email").html(data.error)
+                       $('#email').css("border","1px solid red")
+                            setTimeout(() => {
+                                $('#email').css({  "border": "none", "border-bottom": "2px solid #cccccc", "background": "transparent"})
+                                $(".error_email").html("")
+                            }, 1200);
+                    //    alert(data.error)
+                   }
+                }
+
+            })
+            }
+        
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Raleway:100,200,300,400,500,700,800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <link rel="stylesheet" href="/stylesheets/register.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
+    <script src='https://kit.fontawesome.com/a076d05399.js'></script>
+
+</head>
+
+<body>
+    <div id="popup1" class="overlay">
+        <div class="popup">
+            <div class="content">
+                <h1 style="text-align: center;"></h1>
+            </div>
+        </div>
+    </div>
+
+    <img style="width: 50px; margin: 20px auto; display: block;" src="/images/logo-only.png" width="100%"
+        height="100%" />
+    <a href="/all_video_admin"><button class="back_btn" style="float: left; margin-left:50px ">Back</button></a>
+    <div class="container" style="margin-top: 20px; border: 1px solid #efefef; padding: 50px;">
+        <div class="col-lg-12 holder" style="padding: 0;">
+            <h2 class="text-center" style="margin-bottom: 20px;">Add Users</h2>
+            <div class="col-lg-10" style="padding: 0;">
+                <form id="user_form" class="wrapper animated fadeIn" method="POST"
+                    onsubmit="return validateProfileForm();" autocomplete="off">
+                    <div class="form-group">
+                        <input type="text" name="fullname" id="fullname" placeholder="Full Name" required />
+                    </div>
+
+                    <div class="form-group">
+                        <input type="email" rows="10" name="email" id="email" placeholder="Email" required></input>
+                        <p class="error_email" style="color: red; margin: 0;"></p>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" name="password" id="password" placeholder="Password" required />
+                    </div>
+
+                    <div class="form-group">
+                        <input type="password" rows="10" name="confirmpass" id="confirmpass"
+                            placeholder="Confirm Password" required></input>
+                        <p class="error" style="color: red;margin: 0;"></p>
+                    </div>
+
+                    <button id="submit">Add</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <h3 style="text-align: center;">Manage Users</h3>
+
+
+    <div class="container">
+        <div class="col-lg-12">
+            <div class="row">
+                <table class="table table-bordered table-hover" id="editable_table">
+                    <thead>
+                        <tr>
+                            <th>full Name</th>
+                            <th>Email</th>
+                            <th>Password</th>
+                            <th>Admin</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="all_users">
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        //         //option close when clicked outside
+        //     window.onclick = function(event) {
+        //       var cont = $(".overlay");
+        //       if(!cont.is(event.target) && cont.has(event.target).length === 0){
+        //         document.getElementById("popup1").style.display = "none";
+        //       }
+        //   }
+
+        $(document).ready(function () {
+            get_users();
+        })
+
+        $("#user_form").submit(function (e) {
+            e.preventDefault();
+        });
+
+        function validateProfileForm() {
+            var formdata = new FormData();
+            var fullname, email, password, confirmpass;
+
+            fullname = $('#fullname').val();
+            email = $('#email').val();
+            password = $('#password').val();
+            confirmpass = $('#confirmpass').val();
+
+            formdata.append("fullname", fullname);
+            formdata.append("email", email);
+            formdata.append("password", password);
+            formdata.append("confirmpass", confirmpass);
+
+            if (password != confirmpass) {
+                $('#password').css("border", "1px solid red")
+                $('#confirmpass').css("border", "1px solid red")
+                $(".error").html("Password doesn't match")
+
+                setTimeout(() => {
+                    $('#password').css({ "border": "none", "border-bottom": "2px solid #cccccc", "background": "transparent" })
+                    $('#confirmpass').css({ "border": "none", "border-bottom": "2px solid #cccccc", "background": "transparent" })
+                    $(".error").html("")
+                }, 1200);
+
+            } else {
+                $('#password').css("border", "1px solid green")
+                $('#confirmpass').css("border", "1px solid green")
+
+                setTimeout(() => {
+                    $('#password').css({ "border": "none", "border-bottom": "2px solid #cccccc", "background": "transparent" })
+                    $('#confirmpass').css({ "border": "none", "border-bottom": "2px solid #cccccc", "background": "transparent" })
+                    $(".error").html("")
+                }, 1200);
+
+                $.ajax({
+                    url: 'register',
+                    data: formdata,
+                    contentType: false,
+                    processData: false,
+                    type: 'POST',
+                    beforeSend: function () {
+                        console.log("before sending....");
+                    },
+                    success: function (data) {
+
+                        if (data.success) {
+                            console.log(data);
+                            $(".overlay").css("display", "block");
+
+                            $(".content h1").html("User Added Successfully");
+                            get_users();
+
+                            $(':input').val('');
+
+                            setTimeout(() => {
+                                $(".overlay").css("display", "none");
+                            }, 1000);
+
+                        } else {
+                            $(".error_email").html(data.error)
+                            $('#email').css("border", "1px solid red")
+                            setTimeout(() => {
+                                $('#email').css({ "border": "none", "border-bottom": "2px solid #cccccc", "background": "transparent" })
+                                $(".error_email").html("")
+                            }, 1200);
+                        }
+                    }
+
+                })
+            }
+
+        }
+    </script>
+    <script>
+
+
+        async function get_users() {
+            $.ajax({
+                url: "get_users",
+                contentType: false,
+                processData: false,
+                type: 'GET',
+                success: (res) => {
+
+                    var buffer = "";
+
+                    for (var i = 1; i < res.data.length; i++) {
+
+                        buffer += `
+                        <tr>
+                        <td>${res.data[i].fullname}</td>
+                        <td>${res.data[i].email}</td>
+                        <td>${res.data[i].password}</td>
+                        <td>${res.data[i].admin}</td>
+                        <td>
+                            <button onclick="delete_user('${res.data[i]._id}')">Delete</button>
+                            <button onclick="update_user('${res.data[i]._id}','${res.data[i].fullname}','${res.data[i].email}','${res.data[i].password}')">Update</button>
+                        </td>
+                        </tr>
+                        `;
+                    }
+
+                    $('#all_users').html(buffer);
+                }
+            })
+        }
+        get_users();
+
+        function update_user(id, name, email, pass) {
+            $(".overlay").css("display", "block");
+            form = `<form id="update_form" method="POST" onsubmit="return update_details('${id}');" class="wrapper animated fadeIn" autocomplete="off" style="margin:30px">
+                    <h2 class="text-center">Detail Update</h2>
+                            <div class="form-group">
+                                <input type="text" name="fullname" id="new_fullname" placeholder="Full Name" value="${name}" required />
+                            </div>
+            
+                            <div class="form-group">
+                                <input type="email" rows="10" name="email" id="new_email" placeholder="Email" value="${email}" required></input>
+                                <p class="error_email" style="color: red; margin: 0;"></p>
+                            </div>
+                            <div class="form-group" style="position:relative">
+                                <input type="password" name="password" id="new_password" placeholder="Password" data-toggle="password" value="${pass}" required />
+                                <i class="fa fa-eye" onclick="show_password()" style="position:absolute;right:0;top:50%;transform:translate(0,-50%)"></i>
+                            </div>
+
+                            <div class="form-group" style="position:relative">
+                                 <input type="password" rows="10" name="confirmpass" id="new_confirmpass" placeholder="Confirm Password" required></input>
+                                 <i class="fa fa-eye" onclick="show_confpassword()" style="position:absolute;right:0;top:50%;transform:translate(0,-50%)"></i>
+                                 <p class="update_error" style="color: red;margin: 0;"></p>
+                            </div>
+                                <button id="submit">Update</button>
+                                <div style="display:inline-block" id="cancel" onclick="closeform(this)">Cancel</div>
+                        </form>`;
+
+            $(".content").html(form)
+        }
+
+        function closeform(elem){
+                $("#popup1").css("display","none");
+        }
+  
+        //show password feature
+        function show_password() {
+            var pass = document.getElementById("new_password");
+            if (pass.type === "password" ) {
+                pass.type = "text";
+            }else{
+                pass.type = "password";
+            }
+        }
+
+        function show_confpassword() {
+            var pass = document.getElementById("new_confirmpass");
+            if (pass.type === "password" ) {
+                pass.type = "text";
+            }else{
+                pass.type = "password";
+            }
+        }
+
+
+        //Update users details
+        function update_details(id) {
+            event.preventDefault();
+            var updateform = new FormData();
+            let new_fullname, new_email, new_password, new_confirmpass;
+
+            new_fullname = $('#new_fullname').val();
+            new_email = $('#new_email').val();
+            new_password = $('#new_password').val();
+            new_confirmpass = $('#new_confirmpass').val();
+
+            updateform.append("fullname", new_fullname);
+            updateform.append("email", new_email);
+            updateform.append("password", new_password);
+            updateform.append("confirmpass", new_confirmpass);
+
+            if (new_password != new_confirmpass) {
+                $('#new_password').css("border", "1px solid red")
+                $('#new_confirmpass').css("border", "1px solid red")
+                $(".update_error").html("Password doesn't match")
+
+                setTimeout(() => {
+                    $('#new_password').css({ "border": "none", "border-bottom": "2px solid #cccccc", "background": "transparent" })
+                    $('#new_confirmpass').css({ "border": "none", "border-bottom": "2px solid #cccccc", "background": "transparent" })
+                    $(".update_error").html("")
+                }, 1000);
+            }
+            else {
+                $.ajax({
+                    url: "edit_user/" + id,
+                    type: "POST",
+                    data: updateform,
+                    contentType: false,
+                    processData: false,
+                    success: (res) => {
+                        console.log(res)
+                        if (res.status) {
+                            // alert(res.message)
+                            $(".content").html("<h2 class='text-center'>Successfully Updated</h2>")
+                            setTimeout(() => {
+                                window.location = "/add_user";
+                            }, 2000);
+
+                        } else {
+                            alert(res.error)
+                        }
+                    }
+                })
+            }
+        }
+
+
+        function delete_user(args) {
+            $.ajax({
+                url: "delete_user/" + args,
+                type: "POST",
+                contentType: false,
+                processData: false,
+                success: (res) => {
+                    console.log(res)
+                    if (res.status) {
+                        alert(res.message)
+                        get_users();
+                    } else {
+                        alert(res.error)
+                    }
+                }
+            })
+        }
+
+    </script>
+</body>
+
+</html>

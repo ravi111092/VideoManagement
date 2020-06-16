@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Video</title>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Raleway:100,200,300,400,500,700,800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel='stylesheet' href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
+</head>
+
+<body>
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+
+        </div>
+
+    </div>
+
+    <div class="container-fluid"> 
+
+        <!-- for transparent background effect when slide is opened -->
+        <div id="overlay" class="animated fadeIn faster"></div>
+
+        <!-- sidebar -->
+            <div id="mySidenav" class="sidenav" style="text-align:left;">
+
+                <div style="margin: 50px;">
+                    <a href="javascript:void(0)" class="closebtn" onclick="closeNav(this)">&times;</a>
+                    <h4 class="page-title" style="text-align: left;color: #fff; position: relative; margin: 0;">Tags</h4>
+                </div>
+
+                <div style="margin-left: 42px;margin-right: 20px; width:300px"> 
+                    <ul id="showcategory">
+                    </ul>
+                </div>
+            </div> 
+       
+        <div class="col-lg-12" style="padding: 0;">
+            <div class="row" style="padding: 0 15px; background-color: #f2f2f2 !important;">
+
+                <div style="margin-left:10px; margin-top: 30px; width:100%;">
+                    <div class="hamburger_body" onclick="sidemenu()" style="float:left">
+                        <div class="bar bar1"></div>
+                        <div class="bar bar2" style="width: 80%;"></div>
+                        <div class="bar bar3"></div>
+                    </div>
+                    <div class="logo" style="margin:10px auto;"> <img style="margin:0" src="/images/inkincaps.png" /></div>
+                </div>
+                <div class="col-lg-12" class="filter" style="margin:0; padding:0 10px!important">
+
+                    <div class="login_div" style="text-align: center; margin:20px 0;">
+
+                        <div style="float:left"> 
+                            <a href="/upload_admin" class="add-btn"><i class="fa fa-plus" aria-hidden="true"></i></a>
+                            <div style="display: inline-block; font-size: 18px;">Add Video</div>
+                        </div>
+
+                        
+                            <div style="float:left"> 
+                                <a href="/add_user" class="add-btn" style="margin-left: 20px;"><i class="fa fa-plus" aria-hidden="true"></i></a>
+                                <div style="display: inline-block; font-size: 18px;">Add User</div>
+                            </div>
+                            
+                            <div style="float:left"> 
+                                <a href="/logs" class="add-btn" style="margin-left: 20px;"><i class="fa fa-plus" aria-hidden="true"></i></a>
+                                <div style="display: inline-block; font-size: 18px;">All Logs</div>
+                            </div>
+                        
+                        
+                        <div class="searchbar" style="margin-right: 350px !important; "> 
+                            <input type="text" placeholder="Search here.." name="search" id="search" autocomplete="off">
+                            <button onclick="search()"><i class="fa fa-search" ></i></button>
+
+                            <div class="title_div" style="text-align:left;display:none; width: 650px; margin: 0 auto;position: absolute;">
+                                <ul class="title_ul" style="padding-left: 0px;">
+    
+                                </ul>
+                            </div>
+                            
+                        </div>
+
+                        <div class="options_box">
+                            <div style='float:left ; margin:3px 8px;font-size: 18px;'>Welcome, <span class="usrname"></span></div>
+                            <i class="fa fa-cog option_show"></i>
+                            <div id="myDropdown" class="options">
+                                <a href="/account_setting">Account Settings</a>
+                                <div style="color:#fff; padding: 8px 0;" onclick="logout()">Logout</div>
+                            </div>
+                        </div>
+                        
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="main_container">
+
+                <div class="row" style="margin: 0px !important; margin-top: 30px !important;">
+                    <div class="video_content" style="margin: 0px !important;">
+
+                    </div>
+                </div>
+
+                <div style="clear: both;"></div>
+
+                <div class="text-center" style="margin-top: 5px;">
+                    <ul class="row pagination_ul pagination">
+
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+    <script>
+        
+    //logout session
+        function logout(){
+            sessionStorage.clear();
+            window.location.href="logout"
+        }
+
+    //option close when clicked outside
+    window.onclick = function(event) {
+      var cont = $(".options_box");
+      if(!cont.is(event.target) && cont.has(event.target).length === 0){
+        document.getElementById("myDropdown").classList.remove("show");
+      }
+  }
+        //make suggestion disappear when click anywhere on body
+        $(document).click(function (event) {
+            if (event.type === "click" || event.target.name === "search") {
+                $('.title_div').fadeOut();
+            }
+        })
+
+    </script>
+
+
+    <script>
+
+        //displaying on load
+        $(document).ready(function () {
+            $(".usrname").html(sessionStorage.getItem("username"));
+            console.log(sessionStorage.getItem("username"))
+
+            video_concat = ""
+
+            get_all_Data();
+
+            //display filter on load
+            var buffer_cat = `<li style="margin-left:0px" id="category_list_all" class="category_list active_1" onclick="get_all_Data()">All</li>`;
+
+            $.ajax({
+                url: '/get_all_tag',
+                contentType: "application/json",
+                processData: false,
+                type: 'GET',
+                success: function (data, status) {
+
+                    for (var i = 0; i < data.data.length; i++) {
+                        buffer_cat += `<li id="category_list_${i}" class="category_list" onclick=showtag('${i}','${data.data[i]._id}','${escape(data.data[i].tag)}','${escape(data.data[i].tag)}')>${data.data[i].tag}</li>`;
+                    }
+                    $("#showcategory").html(buffer_cat)
+                }
+            });
+        })
+
+        async function get_all_Data() {
+
+            $("#category_list_all").addClass("active_1");
+            $("#showsubcategory").html("");
+            $('.pagination_ul').html(``);
+            video_concat = "";
+            var page = 1;
+            $.ajax({
+                url: `/video_gallery/${page}`,
+                type: 'GET',
+                data: { page: page ? page : 1 },
+                success: function (data, status) {
+                    //////////////////////
+                    if (data.pages > 0) {
+                        if (data.current == 1) {
+
+                            $('.pagination_ul').append(`<li class="disabled"><a>First</a></li>`)
+                        } else {
+                            $('.pagination_ul').append(`<li onclick="passpage(${i})" style="display : inline-block"><a>First</a></li>`)
+                        }
+                        var i = (Number(data.current) > 5 ? Number(data.current) - 4 : 1);
+                        if (i !== 1) {
+                            $('.pagination_ul').append(`<li class="disabled"><a>...</a></li>`);
+                        }
+                        for (; i <= (Number(data.current) + 4) && i <= data.pages; i++) {
+                            if (i == data.current) {
+                                $('.pagination_ul').append(`<li class="active"><a>${i}</a></li>`)
+                            } else {
+                                $('.pagination_ul').append(`<li onclick="passpage(${i})"><a>${i}</a></li>`)
+                            }
+                            if (i == Number(data.current) + 4 && i < data.pages) {
+                                $('.pagination_ul').append(`<li class="disabled"><a>...</a></li>`);
+                            }
+                        }
+                        if (data.current == data.pages) {
+                            $('.pagination_ul').append(`<li class="disabled"><a>Last</a></li>`)
+                        } else {
+                            $('.pagination_ul').append(`<li onclick="passpage(${data.pages})"><a>Last</a></li>`)
+                        }
+                    }
+                    /////////////////
+                    for (var i = 0; i < data.data.length; i++) {
+                        // onmouseover="this.play();"
+                        video_concat += `
+                        <div class="col-lg-4 animated fadeIn" style="margin:0px; padding:10px;">
+                                    <div style="height:240px;border:1px solid #eeee; position:relative">
+                                    
+                                         <video class="video" id="${data.data[i]._id} video" preload="metadata" controls width="606" height="500">
+                                            <source src="${data.data[i].video}" type="video/mp4">
+                                        </video>
+                                    </div>
+                                    <div class="details"> 
+                                        <div style="width:50%; float:left">
+                                            <h4 style="margin:8px; width:40%;  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${data.data[i].title}</h4>
+                                        </div>
+                                        <div style="width:50%; float:right;">
+                                            <a href="${data.data[i].download_link}" style="float:right;margin:5px"><img width="21" height="21" src="/images/download_icon.ico"/></a>
+                                        </div>
+                                    </div>
+                         </div>
+                            `;
+                    }
+                    $(".video_content").html(video_concat + "<div style='clear: both;'></div>");
+                }
+            })
+
+        }
+
+        ////////////////// pagination index here for tag and get_all
+        function passpage(pa) {
+            $.ajax({
+                url: `/video_gallery/${pa}`,
+                type: 'GET',
+                data: { page: pa ? pa : 1 },
+                success: function (data, status) {
+
+                    video_concat = '';
+                    $(".video_content").html(video_concat);
+                    $('.pagination_ul').html(``)
+                    //////////////////////
+                    if (data.pages > 0) {
+                        if (data.current == 1) {
+
+                            $('.pagination_ul').append(`<li class="disabled"><a>First</a></li>`)
+                        } else {
+                            $('.pagination_ul').append(`<li onclick="passpage(${1})"><a>First</a></li>`)
+                        }
+                        var i = (Number(data.current) > 5 ? Number(data.current) - 4 : 1);
+                        if (i !== 1) {
+                            $('.pagination_ul').append(`<li class="disabled"><a>...</a></li>`);
+                        }
+                        for (; i <= (Number(data.current) + 4) && i <= data.pages; i++) {
+                            if (i == data.current) {
+                                $('.pagination_ul').append(`<li class="active"><a>${i}</a></li>`)
+                            } else {
+                                $('.pagination_ul').append(`<li onclick="passpage(${i})"><a>${i}</a></li>`)
+                            }
+                            if (i == Number(data.current) + 4 && i < data.pages) {
+                                $('.pagination_ul').append(`<li class="disabled"><a>...</a></li>`);
+                            }
+                        }
+                        if (data.current == data.pages) {
+                            $('.pagination_ul').append(`<li class="disabled"><a>Last</a></li>`)
+                        } else {
+                            $('.pagination_ul').append(`<li onclick="passpage(${data.pages})"><a>Last</a></li>`)
+                        }
+                    }
+
+                    /////////////////
+                    for (var i = 0; i < data.data.length; i++) {
+                        // onmouseover="this.play();"
+                        video_concat += `
+                        <div class="col-lg-4 animated fadeIn" style="margin:0px; padding:10px; ">
+                                    <div style="overflow:hidden; height:240px;border:1px solid #eeee">
+                                        
+                                        <video class="video" id="${data.data[i]._id} video" preload="metadata" controls width="606" height="500" muted>
+                                            <source src="${data.data[i].video}" type="video/mp4">
+                                        </video>
+                                    </div>
+                                    <div class="details"> 
+                                        <div style="width:50%; float:left">
+                                            <h4 style="margin:8px; width:40%;  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${data.data[i].title}</h4>
+                                        </div>
+                                        <div style="width:50%; float:right;">
+                                            <a href="${data.data[i].download_link}" style="float:right;margin:5px"><img width="21" height="21" src="/images/download_icon.ico"/></a>
+                                        </div>
+                                    </div>
+                         </div>
+                            
+                            `;
+                    }
+                    $(".video_content").html(video_concat + "<div style='clear: both;'></div>");
+                }
+            })
+        }
+
+        function passpage_tag(pa) {
+
+            $.ajax({
+                url: `/filter_data/${pa}`,
+                type: 'POST',
+                data: { page: pa ? pa : 1, cat: unescape(tag_category) },
+                success: function (data, status) {
+
+                    video_concat = '';
+                    $(".video_content").html(video_concat);
+                    $('.pagination_ul').html(``)
+                    //////////////////////
+                    if (data.pages > 0) {
+                        if (data.current == 1) {
+
+                            $('.pagination_ul').append(`<li class="disabled"><a>First</a></li>`)
+                        } else {
+                            $('.pagination_ul').append(`<li onclick="passpage_tag(${1})"><a>First</a></li>`)
+                        }
+                        var i = (Number(data.current) > 5 ? Number(data.current) - 4 : 1);
+                        if (i !== 1) {
+                            $('.pagination_ul').append(`<li class="disabled"><a>...</a></li>`);
+                        }
+                        for (; i <= (Number(data.current) + 4) && i <= data.pages; i++) {
+                            if (i == data.current) {
+                                $('.pagination_ul').append(`<li class="active"><a>${i}</a></li>`)
+                            } else {
+                                $('.pagination_ul').append(`<li onclick="passpage_tag(${i})"><a>${i}</a></li>`)
+                            }
+                            if (i == Number(data.current) + 4 && i < data.pages) {
+                                $('.pagination_ul').append(`<li class="disabled"><a>...</a></li>`);
+                            }
+                        }
+                        if (data.current == data.pages) {
+                            $('.pagination_ul').append(`<li class="disabled"><a>Last</a></li>`)
+                        } else {
+                            $('.pagination_ul').append(`<li onclick="passpage_tag(${data.pages})"><a>Last</a></li>`)
+                        }
+                    }
+                    /////////////////
+                    for (var i = 0; i < data.data.length; i++) {
+                        // onmouseover="this.play();"
+                        video_concat += `
+                        <div class="col-lg-4 animated fadeIn" style="margin:0px; padding:10px; ">
+                                    <div style="overflow:hidden; height:240px;border:1px solid #eeee">
+                                        
+                                        <video class="video" id="${data.data[i]._id} video" preload="metadata" controls width="606" height="500" muted>
+                                            <source src="${data.data[i].video}" type="video/mp4">
+                                        </video>
+                                    </div>
+                                    <div class="details"> 
+                                        <div style="width:50%; float:left">
+                                            <h4 style="margin:8px; width:40%;  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${data.data[i].title}</h4>
+                                        </div>
+                                        <div style="width:50%; float:right;">
+                                            <a href="${data.data[i].download_link}" style="float:right;margin:5px"><img width="21" height="21" src="/images/download_icon.ico"/></a>
+                                        </div>
+                                    </div>
+                         </div>
+                            
+                            `;
+                    }
+                    $(".video_content").html(video_concat + "<div style='clear: both;'></div>");
+                }
+            })
+
+        }
+
+        function passpage_multiple_tag(pa2) {
+            console.log(multiple_tag);
+            $.ajax({
+                url: `/filter_data/${pa2}`,
+                type: 'POST',
+                data: { cat: unescape(multiple_tag) },
+                success: function (data, status) {
+
+                    video_concat = '';
+                    $(".video_content").html(video_concat);
+                    $('.pagination_ul').html(``)
+                    //////////////////////
+                    if (data.pages > 0) {
+                        if (data.current == 1) {
+
+                            $('.pagination_ul').append(`<li class="disabled"><a>First</a></li>`)
+                        } else {
+                            $('.pagination_ul').append(`<li onclick="passpage_multiple_tag(${1})"><a>First</a></li>`)
+                        }
+                        var i = (Number(data.current) > 5 ? Number(data.current) - 4 : 1);
+                        if (i !== 1) {
+                            $('.pagination_ul').append(`<li class="disabled"><a>...</a></li>`);
+                        }
+                        for (; i <= (Number(data.current) + 4) && i <= data.pages; i++) {
+                            if (i == data.current) {
+                                $('.pagination_ul').append(`<li class="active"><a>${i}</a></li>`)
+                            } else {
+                                $('.pagination_ul').append(`<li onclick="passpage_multiple_tag(${i})"><a>${i}</a></li>`)
+                            }
+                            if (i == Number(data.current) + 4 && i < data.pages) {
+                                $('.pagination_ul').append(`<li class="disabled"><a>...</a></li>`);
+                            }
+                        }
+                        if (data.current == data.pages) {
+                            $('.pagination_ul').append(`<li class="disabled"><a>Last</a></li>`)
+                        } else {
+                            $('.pagination_ul').append(`<li onclick="passpage_multiple_tag(${data.pages})"><a>Last</a></li>`)
+                        }
+                    }
+                    /////////////////
+                    console.log(data.data)
+                    for (var i = 0; i < data.data.length; i++) {
+                        // onmouseover="this.play();"
+                        video_concat += `
+                        <div class="col-lg-4 animated fadeIn" style="margin:0px; padding:10px; ">
+                                    <div style="overflow:hidden; height:240px;border:1px solid #eeee">
+                                        
+                                        <video class="video" id="${data.data[i]._id} video" preload="metadata" controls width="606" height="500" muted>
+                                            <source src="${data.data[i].video}" type="video/mp4">
+                                        </video>
+                                    </div>
+                                    <div class="details"> 
+                                        <div style="width:50%; float:left">
+                                            <h4 style="margin:8px; width:40%;  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${data.data[i].title}</h4>
+                                        </div>
+                                        <div style="width:50%; float:right;">
+                                            <a href="${data.data[i].download_link}" style="float:right;margin:5px"><img width="21" height="21" src="/images/download_icon.ico"/></a>
+                                        </div>
+                                    </div>
+                         </div>
+                            `;
+                    }
+                    $(".video_content").html(video_concat + "<div style='clear: both;'></div>");
+                }
+            })
+        }
+
+        function passpage_search(pa) {
+            $('.title_div').fadeOut();
+            $.ajax({
+                url: `/search_bar/${pa}`,
+                type: 'POST',
+                data: search_body,
+                success: function (data, status) {
+                    video_concat = '';
+                    var tag_title = "";
+                    $(".video_content").html(video_concat);
+                    $('.pagination_ul').html(``)
+
+                    if (data.data.length < 1) {
+
+                        $(".video_content").html("<div style='font-size:49px;width:100%;height:100%;display:flex;justify-content:center;'><p>NO SUCH VIDEO</p>");
+                    } else {
+
+                        //////////////////////
+                        if (data.pages > 0) {
+                            if (data.current == 1) {
+
+                                $('.pagination_ul').append(`<li class="disabled"><a>First</a></li>`)
+                            } else {
+                                $('.pagination_ul').append(`<li onclick="passpage_search(${i})" style="display : inline-block"><a>First</a></li>`)
+                            }
+                            var i = (Number(data.current) > 5 ? Number(data.current) - 4 : 1);
+                            if (i !== 1) {
+                                $('.pagination_ul').append(`<li class="disabled"><a>...</a></li>`);
+                            }
+                            for (; i <= (Number(data.current) + 4) && i <= data.pages; i++) {
+                                if (i == data.current) {
+                                    $('.pagination_ul').append(`<li class="active"><a>${i}</a></li>`)
+                                } else {
+                                    $('.pagination_ul').append(`<li onclick="passpage_search(${i})"><a>${i}</a></li>`)
+                                }
+                                if (i == Number(data.current) + 4 && i < data.pages) {
+                                    $('.pagination_ul').append(`<li class="disabled"><a>...</a></li>`);
+                                }
+                            }
+                            if (data.current == data.pages) {
+                                $('.pagination_ul').append(`<li class="disabled"><a>Last</a></li>`)
+                            } else {
+                                $('.pagination_ul').append(`<li onclick="passpage_search(${data.pages})"><a>Last</a></li>`)
+                            }
+                        }
+
+                        /////////////////
+                        for (var i = 0; i < data.data.length; i++) {
+
+                            tag_title += `<li class="tag_list" onclick="tag_to_search('${data.data[i].title}')">${data.data[i].title}</li>`
+                            video_concat += `
+                            <div class="col-lg-4 animated fadeIn" style="margin:0px; padding:10px; ">
+                                    <div style="overflow:hidden; height:240px;border:1px solid #eeee">
+                                        
+                                        <video class="video" id="${data.data[i]._id} video" preload="metadata" controls width="606" height="500" muted>
+                                            <source src="${data.data[i].video}" type="video/mp4">
+                                        </video>
+                                    </div>
+                                    <div class="details"> 
+                                        <div style="width:50%; float:left">
+                                            <h4 style="margin:8px; width:40%;  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${data.data[i].title}</h4>
+                                        </div>
+                                        <div style="width:50%; float:right;">
+                                            <a href="${data.data[i].download_link}" style="float:right;margin:5px"><img width="21" height="21" src="/images/download_icon.ico"/></a>
+                                        </div>
+                                    </div>
+                         </div>
+                            
+                            `;
+                        }
+                        $('.title_ul').html(tag_title);
+                        $(".video_content").html(video_concat + "<div style='clear: both;'></div>");
+                    }
+                }
+            });
+
+        }
+
+        //on title search from suggesstion
+        function show_video_data(title) {
+            var body = {
+                title: title,
+                tag: title
+            }
+            $.ajax({
+                url: '/search_bar/1',
+                type: 'POST',
+                data: body,
+                success: function (data, status) {
+                    video_concat = '';
+                    $(".video_content").html(video_concat);
+                    $('.pagination_ul').html(``)
+                    if (data.data.length < 1) {
+
+                        $(".video_content").html("<div style='font-size:49px;width:100%;height:100%;display:flex;justify-content:center;'><p>NO SUCH VIDEO</p>");
+                    } else {
+
+                        //////////////////////
+                        if (data.pages > 0) {
+                            if (data.current == 1) {
+
+                                $('.pagination_ul').append(`<li class="disabled"><a>First</a></li>`)
+                            } else {
+                                $('.pagination_ul').append(`<li onclick="passpage_search(${i})" style="display : inline-block"><a>First</a></li>`)
+                            }
+                            var i = (Number(data.current) > 5 ? Number(data.current) - 4 : 1);
+                            if (i !== 1) {
+                                $('.pagination_ul').append(`<li class="disabled"><a>...</a></li>`);
+                            }
+                            for (; i <= (Number(data.current) + 4) && i <= data.pages; i++) {
+                                if (i == data.current) {
+                                    $('.pagination_ul').append(`<li class="active"><a>${i}</a></li>`)
+                                } else {
+                                    $('.pagination_ul').append(`<li onclick="passpage_search(${i})"><a>${i}</a></li>`)
+                                }
+                                if (i == Number(data.current) + 4 && i < data.pages) {
+                                    $('.pagination_ul').append(`<li class="disabled"><a>...</a></li>`);
+                                }
+                            }
+                            if (data.current == data.pages) {
+                                $('.pagination_ul').append(`<li class="disabled"><a>Last</a></li>`)
+                            } else {
+                                $('.pagination_ul').append(`<li onclick="passpage_search(${data.pages})"><a>Last</a></li>`)
+                            }
+                        }
+                        /////////////////
+                        for (var i = 0; i < data.data.length; i++) {
+                            video_concat += `
+                <div class="col-lg-4 animated fadeIn" style="margin:0px; padding:10px; ">
+                        <div style="overflow:hidden; height:240px;border:1px solid #eeee">
+                            
+                            <video class="video" id="${data.data[i]._id} video" preload="metadata" controls width="606" height="500" muted>
+                                            <source src="${data.data[i].video}" type="video/mp4">
+                                        </video>
+                        </div>
+                        <div class="details"> 
+                            <div style="width:50%; float:left">
+                                <h4 style="margin:8px; width:40%;  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${data.data[i].title}</h4>
+                            </div>
+                            <div style="width:50%; float:right;">
+                                <a href="${data.data[i].download_link}" style="float:right;margin:5px"><img width="21" height="21" src="/images/download_icon.ico"/></a>
+                            </div>
+                        </div>
+             </div>`;
+                        }
+
+                        $(".video_content").html(video_concat + "<div style='clear: both;'></div>");
+                    }
+                }
+            });
+        }
+
+        //onkeyup search
+        var search_body = {};
+        document.getElementById("search").addEventListener("keyup", function () {
+
+            var display_video = "";
+
+
+            var search_data = $("#search").val();
+            var body = {
+                title: search_data,
+                tag: search_data
+            }
+            get_search_title(search_data); // get search title here
+            search_body = body;
+
+            var _searchVal = $('#search').val().length;
+
+            $('.category_list').removeClass('active_1');
+            $('.subcat').removeClass('active_1');
+            $('#showsubcategory').css("display", "none");
+
+
+            $.ajax({
+                url: '/search_bar/1',
+                type: 'POST',
+                data: body,
+                success: function (data, status) {
+                    video_concat = '';
+                    $(".video_content").html(video_concat);
+                    $('.pagination_ul').html(``)
+                    console.log(data)
+                    if (data.data.length < 1) {
+
+                        $(".video_content").html("<div style='font-size:49px;width:100%;height:100%;display:flex;justify-content:center;'><p>NO SUCH VIDEO</p>");
+                    } else {
+
+                        //////////////////////
+                        if (data.pages > 0) {
+                            if (data.current == 1) {
+
+                                $('.pagination_ul').append(`<li class="disabled"><a>First</a></li>`)
+                            } else {
+                                $('.pagination_ul').append(`<li onclick="passpage_search(${i})" style="display : inline-block"><a>First</a></li>`)
+                            }
+                            var i = (Number(data.current) > 5 ? Number(data.current) - 4 : 1);
+                            if (i !== 1) {
+                                $('.pagination_ul').append(`<li class="disabled"><a>...</a></li>`);
+                            }
+                            for (; i <= (Number(data.current) + 4) && i <= data.pages; i++) {
+                                if (i == data.current) {
+                                    $('.pagination_ul').append(`<li class="active"><a>${i}</a></li>`)
+                                } else {
+                                    $('.pagination_ul').append(`<li onclick="passpage_search(${i})"><a>${i}</a></li>`)
+                                }
+                                if (i == Number(data.current) + 4 && i < data.pages) {
+                                    $('.pagination_ul').append(`<li class="disabled"><a>...</a></li>`);
+                                }
+                            }
+                            if (data.current == data.pages) {
+                                $('.pagination_ul').append(`<li class="disabled"><a>Last</a></li>`)
+                            } else {
+                                $('.pagination_ul').append(`<li onclick="passpage_search(${data.pages})"><a>Last</a></li>`)
+                            }
+                        }
+                        /////////////////
+                        for (var i = 0; i < data.data.length; i++) {
+                            video_concat += `
+                            <div class="col-lg-4 animated fadeIn" style="margin:0px; padding:10px; ">
+                                    <div style="overflow:hidden; height:240px;border:1px solid #eeee">
+                                        
+                                        <video class="video" id="${data.data[i]._id} video" preload="metadata" controls width="606" height="500" muted>
+                                            <source src="${data.data[i].video}" type="video/mp4">
+                                        </video>
+                                    </div>
+                                    <div class="details"> 
+                                        <div style="width:50%; float:left">
+                                            <h4 style="margin:8px; width:40%;  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${data.data[i].title}</h4>
+                                        </div>
+                                        <div style="width:50%; float:right;">
+                                            <a href="${data.data[i].download_link}" style="float:right;margin:5px"><img width="21" height="21" src="/images/download_icon.ico"/></a>
+                                        </div>
+                                    </div>
+                         </div>`;
+                        }
+
+                        $(".video_content").html(video_concat + "<div style='clear: both;'></div>");
+                    }
+                }
+            });
+        })
+
+        // get title when search 
+        function get_search_title(search_data) {
+            var tag_title = "";
+            console.log(search_data);
+            var title_body = {
+                title: search_data
+            }
+            var _searchVal = $('#search').val().length;
+            if (_searchVal == 0) {
+                $('.title_div').hide();
+            }
+            else {
+                $('.title_div').show();
+                $(".title_ul").html("<div class='message'>No suggestion</div>")
+            }
+            $('.category_list').removeClass('active_1');
+            $('.subcat').removeClass('active_1');
+            $('#showsubcategory').css("display", "none");
+            $.ajax({
+                url: '/all_title_search',
+                type: 'POST',
+                data: title_body,
+                success: function (data) {
+                    console.log(data.data);
+                    for (var i = 0; i < data.data.length; i++) {
+                        tag_title += `<li class="tag_list" onclick="tag_to_search('${data.data[i].title}')">${data.data[i].title}</li>`
+                    }
+                    $('.title_ul').html(tag_title);
+                }
+
+            })
+        }
+
+        //click on category to display subcategory list
+        var multiple_tag = [];
+        function filter_multiple_tag(multi_tag) {
+            $(".video_content").html('');
+            $.ajax({
+                url: '/filter_data/1',
+                data: {
+                    cat: unescape(multi_tag)
+                },
+                type: 'POST',
+                success: function (data, status) {
+                    console.log(data)
+                    console.log(data.data.length);
+
+                    video_concat = '';
+                    $(".video_content").html(video_concat);
+                    $('.pagination_ul').html(``)
+                    if (data.data.length < 1) {
+                        $(".video_content").html("<div style='font-size:49px;width:100%;height:100%;display:flex;justify-content:center;align-items:center;'><p>NO SUCH VIDEO</h1><p>");
+                    } else {
+                        if (data.pages > 0) {
+                            if (data.current == 1) {
+                                console.log("data.current : " + data.current);
+                                $('.pagination_ul').append(`<li class="disabled"><a>First</a></li>`)
+                            } else {
+                                $('.pagination_ul').append(`<li><a>First</a></li>`)
+                            }
+                            var i = (Number(data.current) > 5 ? Number(data.current) - 4 : 1);
+                            if (i !== 1) {
+                                $('.pagination_ul').append(`<li class="disabled"><a>...</a></li>`);
+                            }
+                            for (; i <= (Number(data.current) + 4) && i <= data.pages; i++) {
+                                if (i == data.current) {
+                                    $('.pagination_ul').append(`<li class="active"><a>${i}</a></li>`)
+                                } else {
+                                    $('.pagination_ul').append(`<li onclick="passpage_multiple_tag(${i})"><a>${i}</a></li>`)
+                                }
+                                if (i == Number(data.current) + 4 && i < data.pages) {
+                                    $('.pagination_ul').append(`<li class="disabled"><a>...</a></li>`);
+                                }
+                            }
+                            if (data.current == data.pages) {
+                                $('.pagination_ul').append(`<li class="disabled"><a>Last</a></li>`)
+                            } else {
+                                $('.pagination_ul').append(`<li onclick="passpage_multiple_tag(${data.pages})"><a>Last</a></li>`)
+                            }
+                        }
+                        /////////////////
+                        for (var i = 0; i < data.data.length; i++) {
+                            // onmouseover="this.play();"
+                            video_concat += `
+                            <div class="col-lg-4 animated fadeIn" style="margin:0px; padding:10px; ">
+                                    <div style="overflow:hidden; height:240px;border:1px solid #eeee">
+                                        
+                                        <video class="video" id="${data.data[i]._id} video" preload="metadata" controls width="606" height="500" muted>
+                                            <source src="${data.data[i].video}" type="video/mp4">
+                                        </video>
+                                    </div>
+                                    <div class="details"> 
+                                        <div style="width:50%; float:left">
+                                            <h4 style="margin:8px; width:40%;  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${data.data[i].title}</h4>
+                                        </div>
+                                        <div style="width:50%; float:right;">
+                                            <a href="${data.data[i].download_link}" style="float:right;margin:5px"><img width="21" height="21" src="/images/download_icon.ico"/></a>
+                                        </div>
+                                    </div>
+                         </div>`;
+                        }
+                        $(".video_content").html(video_concat + "<div style='clear: both;'></div>");
+                    }
+
+                }
+            });
+        }
+
+
+        function showtag(index, id, subcategory, category) {
+            $("#category_list_all").removeClass("active_1");
+
+            var subcate = "";
+            var splitter = subcategory.split(',');
+            $("#search").val("");
+            $("#search").attr("placeholder");
+            tag_category = category;
+            console.log(category);
+            let index1 = multiple_tag.indexOf(category);
+            console.log(index1)
+            if (index1 >= 0) {
+                multiple_tag.splice(index1, 1);
+                $(`#category_list_${index}`).css({ "background-color": "none", "color": "#000000" })
+                filter_multiple_tag(multiple_tag)
+                $("#category_list_all").click();
+            } else {
+                multiple_tag.push(category);
+                $(`#category_list_${index}`).css({ "background-color": "#303030", "color": "white" })
+                console.log(multiple_tag);
+                filter_multiple_tag(multiple_tag)
+            }
+            $('#showsubcategory').css("display", "inline");
+        }
+
+        async function tag_to_search(search_tag) {
+            $('#search').val(search_tag);
+            show_video_data(search_tag);
+            $('.title_div').fadeOut();
+        }
+
+    </script>
+    <script src="/javascripts/main.js" async></script>
+</body>
+
+</html>
