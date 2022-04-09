@@ -20,7 +20,7 @@
     "http-errors": "~1.6.3",
     "jsonwebtoken": "^8.5.1",
     "localStorage": "^1.0.4",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "moment-timezone": "^0.5.28",
     "mongoose": "^5.9.5",
     "morgan": "~1.9.1",
